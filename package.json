@@ -1,0 +1,20 @@
+{
+  "name": "picshare",
+  "version": "1.0.0",
+  "description": "A secure, production-ready photo-sharing API built with Express.js, HTTPS, Helmet security headers, and optimized caching strategies.",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^5.2.1",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    ""
+  ],
+  "author": "tejiri & ben",
+  "license": "ISC"
+}
