@@ -37,6 +37,7 @@ Strict-Transport-Security (HSTS)
 X-Content-Type-Options
 Referrer-Policy
 
+
 # Caching Strategy
 
 Before choosing caching strategies, we considered:
