@@ -5,16 +5,17 @@
   "main": "app.js",
   "dependencies": {
     "express": "^5.2.1",
-    "helmet": "^8.1.0"
+    "fs": "^0.0.1-security",
+    "helmet": "^8.1.0",
+    "hsts": "^2.2.0",
+    "https": "^1.0.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
-  "keywords": [
-    ""
-  ],
+  "keywords": [],
   "author": "tejiri & ben",
   "license": "ISC"
 }
