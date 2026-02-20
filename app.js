@@ -50,6 +50,7 @@ app.use(
 
 app.get("/", (req, res) => {
     res.send("App Homepage");
+    res.set("Cache-Control", "public, max-age=300");
     });
 
 export default app;
