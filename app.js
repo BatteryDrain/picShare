@@ -1,7 +1,17 @@
-import express from 'express';
+import express from "express";
 import helmet from "helmet";
+import compression from "compression";
+import { intError, notFound } from "./middleware/errorHandler.js";
+import routes from "./routes/index.js";
+
 
 const app = express();
+
+app.disable("x-powered-by");
+
+app.use(express.json());
+app.use(compression());
+
 const isDev = process.env.NODE_ENV !== "production";
 
 app.use(
@@ -20,7 +30,7 @@ app.use(
         frameAncestors: ["'none'"],
       },
     },
-    crossOriginEmbedderPolicy: true,
+    crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: {
       policy: "same-origin",
     },
@@ -49,8 +59,12 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-    res.send("App Homepage");
-    res.set("Cache-Control", "public, max-age=300");
-    });
+  res.set("Cache-Control", "public, max-age=300");
+  res.send("App Homepage");
+});
+
+app.use("/api/v1", routes);
+app.use(notFound);
+app.use(intError);
 
 export default app;

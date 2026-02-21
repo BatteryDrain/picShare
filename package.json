@@ -5,6 +5,7 @@
   "description": "A secure, production-ready photo-sharing API built with Express.js, HTTPS, Helmet security headers, and optimized caching strategies.",
   "main": "app.js",
   "dependencies": {
+    "compression": "^1.8.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0"
