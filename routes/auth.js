@@ -4,7 +4,7 @@ import { noStore } from "../middleware/cache.js";
 const router = express.Router();
 
 router.post("/login", noStore, (req, res) => {
-    res.send("Login Endpoint");
+   res.send("Login Endpoint");
 });
 router.post("/register", noStore, (req, res) => {
     res.send("Register Endpoint");

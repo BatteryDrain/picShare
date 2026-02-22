@@ -9,8 +9,9 @@ router.get("/:id", publicCache(120), (req, res) => {
 router.put("/:id", noStore, (req, res) => {
   res.send("Update User Profile");
 });
-router.get("/:id/photos", publicCache, (req, res) => {
+router.get("/:id/photos", publicCache(120), (req, res) => {
   res.send("Get User Photos");
 });
+
 
 export default router;
