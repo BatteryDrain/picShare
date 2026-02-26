@@ -1,12 +1,11 @@
 import multer from "multer";
+import path from "path";
 
-const upload = multer({
-//   dest: "uploads/"
-});
+const dirName = path.dirname(fileURLToPath(import.meta.url));
 
-export const storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "uploads"));
+    cb(null, path.resolve(dirName, "uploads"));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -14,3 +13,6 @@ export const storage = multer.diskStorage({
   }
 });
 
+export const upload = multer({
+    storage,
+});

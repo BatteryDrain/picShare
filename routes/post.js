@@ -1,16 +1,17 @@
 import express from "express";
-import {storage} from "../middleware/upload.js";
+import upload from "../middleware/upload.js";
 import path from "path";
 
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const router = express.Router();
 
 const app = express();
 const PORT = 3000;
 
-router.post("/uploads", storage, (req, res) => {
+router.post("/uploads", upload, (req, res) => {
     res.send('your uploads');
 });
 
