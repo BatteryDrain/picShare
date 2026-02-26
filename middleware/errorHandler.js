@@ -10,8 +10,7 @@ export const intError = (err, req, res, next) => {
 
   const statusCode = err.statusCode || 500;
   const msg =
-    err.message ||
-    "An internal server error occurred. Please try again later.";
+    err.message || "An internal server error occurred. Please try again later.";
 
   res.status(statusCode).json({
     success: false,
