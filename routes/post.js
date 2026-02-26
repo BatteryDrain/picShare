@@ -14,4 +14,15 @@ router.post("/uploads", storage, (req, res) => {
     res.send('your uploads');
 });
 
+// app.get("/download", (req, res) => {
+//     const filePath = path.join(__dirname, "uploads", "image.png");
+
+//     res.download(filePath, "downloaded-image.png", (err) => {
+//         if (err) {
+//             console.error(err);
+//             res.status(404).send("File not found");
+//         }
+//     });
+// });
+
 export default router;

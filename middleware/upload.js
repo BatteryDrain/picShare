@@ -1,8 +1,8 @@
 import multer from "multer";
 
-// const upload = multer({
+const upload = multer({
 //   dest: "uploads/"
-// });
+});
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
