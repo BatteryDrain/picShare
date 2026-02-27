@@ -4,7 +4,6 @@ import fs from "fs";
 import app from "./app.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import upload from "./middleware/upload.js";
 import { error } from "console";
 
 const dirName = path.dirname(fileURLToPath(import.meta.url));
@@ -37,15 +36,15 @@ if (isDev) {
 }
 
 //post function
-app.post("/upload", upload.single("image"), (req, res) => {
+// app.post("/upload", upload.single("image"), (req, res) => {
 
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
+//   if (!req.file) {
+//     return res.status(400).json({ error: "No file uploaded" });
+//   }
 
-  res.json({
-    message: "File uploaded",
-    file: req.file
-  });
-});
+//   res.json({
+//     message: "File uploaded",
+//     file: req.file
+//   });
+// });
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import { publicCache, privateCache, noStore } from '../middleware/cache.js';
-import { uploadPhoto } from '../middleware/upload.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.get('/explore', publicCache(60), (req, res) => {
     res.send("Get Explore Photos Endpoint");
 });
 
-router.post('/', noStore, uploadPhoto.single('photo'), (req, res) => {
+router.post('/', noStore, upload.single('photo'), (req, res) => {
     res.send("Upload Photo Endpoint");
 }); 
 
