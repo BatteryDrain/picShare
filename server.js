@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 const dirName = path.dirname(fileURLToPath(import.meta.url));
 
 // Serving http/https based on environment
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT 
 
 const isDev = process.env.NODE_ENV !== "production";
 
