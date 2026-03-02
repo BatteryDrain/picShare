@@ -58,10 +58,7 @@ if (isDev) {
   );
 }
 
-app.get("/", (req, res) => {
-  res.set("Cache-Control", "public, max-age=300");
-  res.send("App Homepage");
-});
+app.use("/uploads", express.static("uploads"));
 
 app.use(express.static("dist"));
 if (!isDev){
