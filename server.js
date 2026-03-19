@@ -4,19 +4,25 @@ import fs from "fs";
 import app from "./app.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import connectDB from "./config/db.js";
 
 const dirName = path.dirname(fileURLToPath(import.meta.url));
 
 // Serving http/https based on environment
-const PORT = process.env.PORT 
+const PORT = process.env.PORT || 4000;
 
 const isDev = process.env.NODE_ENV !== "production";
+
+const startServer = async () => {
+
+  await connectDB();
+  
 
 if (isDev) {
   try {
     const sslOptions = {
-      key: fs.readFileSync(path.resolve(dirName,"ssl","server.key")),
-      cert: fs.readFileSync(path.resolve(dirName,"ssl","server.cert")),
+      key: fs.readFileSync(process.env.SSL_KEY_PATH || path.resolve(dirName,"ssl","key.pem")),
+      cert: fs.readFileSync(process.env.SSL_CERT_PATH || path.resolve(dirName,"ssl","cert.pem")),
     };
 
     https.createServer(sslOptions, app).listen(PORT, () => {
@@ -33,3 +39,6 @@ if (isDev) {
     console.log(`Production Server running on ${PORT}`);
   });
 }
+};
+
+startServer();

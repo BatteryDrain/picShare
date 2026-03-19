@@ -5,22 +5,24 @@ import { intError, notFound } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
 import cors from "cors";
 import path from "path";
+import bodyParser from "body-parser";
+
 
 const app = express();
 
-app.disable("x-powered-by");
-
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(compression());
+
 
 const isDev = process.env.NODE_ENV !== "production";
 
 if (isDev) {
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: true,
+      crossOriginEmbedderPolicy: true,
     })
   );
 } else {
