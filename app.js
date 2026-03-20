@@ -5,13 +5,14 @@ import { intError, notFound } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
 import cors from "cors";
 import path from "path";
-import bodyParser from "body-parser";
+import session from "express-session";
+import passport from "passport";
+import {GoogleOAuth} from "./config/googleOauth.js";
 
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(express.json());
 app.use(compression());
 
@@ -51,14 +52,31 @@ if (isDev) {
   );
 }
 
+const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : [];
+
 if (isDev) {
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: allowedOrigins,
       credentials: true,
     })
   );
 }
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: isDev
+    ? { secure: false }
+    : { secure: true, httpOnly: true, sameSite: "strict" }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+GoogleOAuth();
+
 
 app.use("/uploads", express.static("uploads"));
 
