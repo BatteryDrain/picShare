@@ -15,11 +15,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    googleId: {
-        type: String,
-        unique: true,
-        default: null,
-    },
+ 
     isEmailVerified: {
         type: Boolean,
         default: false,
@@ -28,6 +24,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["user", "admin"],
         default: "user",
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0,
+    },
+     lockUntil: {
+        type: Number,
     },
 }, { timestamps: true });
 

@@ -21,14 +21,6 @@ passport.use(new GoogleStrategy({
             user.googleId = profile.id;
             await user.save();
         }}
-        else{
-            user = await newUser({
-                username: profile.displayName,
-                email,
-                googleId: profile.id,
-                role: "user",
-            })
-        }
         return done(null, user);
         }
      catch (error) {

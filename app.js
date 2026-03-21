@@ -8,7 +8,8 @@ import path from "path";
 import session from "express-session";
 import passport from "passport";
 import {GoogleOAuth} from "./config/googleOauth.js";
-
+import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -54,29 +55,34 @@ if (isDev) {
 
 const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : [];
 
-if (isDev) {
+
   app.use(
     cors({
       origin: allowedOrigins,
       credentials: true,
     })
   );
-}
+
+  app.use(cookieParser());
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: isDev
-    ? { secure: false }
-    : { secure: true, httpOnly: true, sameSite: "strict" }
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI, collectionName: "sessions" }),
+  cookie: {
+    secure: !isDev,
+    httpOnly: true,
+    sameSite: isDev ? "lax" : "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 GoogleOAuth();
-
 
 app.use("/uploads", express.static("uploads"));
 
