@@ -233,10 +233,9 @@ Scalable systems start with clear organization.
 - Logging
 - API request validation
 
-## Ben's Reflection 1
+## Ben's Reflection
 
  At the beginning of this project, I was under the impression that we could finish this with routes in the backend. I was heavily mistaken as we needed to see routes making connections and cashing the CSS. As the backend has no CSS. To do this, we need a front-end. We have now made a front-end and a back-end with CSS caching.
 
-## Ben's Reflection 2
-
-The big constraint I faced during phase 2 was given part B and C to compleate but I couldn't start until I got part A. Part  was commited to main less than 36 hours before the deadline. Guiven this time constraint and my inabilty to connect to mongo compus I will have to send my code to a group member to test it
+## Ben's reflection 2
+ One of the things that was difficult with this phase was the time allowed I recieved section A (auth) a day before this assiognment was due. I had to ask for an extention as I had to finish section B and C, giving us enoughf time to compleate the sections.
