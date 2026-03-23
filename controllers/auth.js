@@ -130,8 +130,34 @@ export const loginAuth = async (req, res) => {
 };
 
 export const logoutAuth = async (req, res) => {
-  res.status(200).json({ message: "Logout successful" });
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+    
+      await User.findOneAndUpdate(
+        { refreshToken: refreshToken },
+        { $set: { refreshToken: null } }
+      );
+    }
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    if (req.session) {
+      req.session.destroy();
+    }
+
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout Error:", error);
+    res.status(500).json({ message: "Error during logout" });
+  }
 };
+
 
 export const forgotPasswordAuth = async (req, res) => {
   const { email } = req.body;
@@ -203,18 +229,18 @@ export const googleCallbackAuth = async (req, res) => {
     { failureRedirect: "/login" },
     (err, user) => {
       if (err || !user) {
-        return res.redirect("/login");
+        return res.redirect("http://localhost:5173/login");
       }
       req.logIn(user, (err) => {
         if (err) {
-          return res.redirect("/login");
+          return res.redirect("/http://localhost:5173/login");
         }
         const token = jwt.sign(
           { id: user._id, role: user.role },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
         );
-        res.redirect(`/oauth-success?token=${token}`);
+        res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
       });
     }
   );
