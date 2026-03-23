@@ -132,7 +132,7 @@ npm start
 
 ---
 
-## ✅ Cookie Security
+## Cookie Security
 
 ```js
 httpOnly: true
@@ -142,7 +142,7 @@ sameSite: "strict"
 
 ---
 
-## ✅ Rate Limiting & Account Lockout
+## Rate Limiting & Account Lockout
 
 * 10 requests per 15 minutes (IP-based)
 * Account locked after 5 failed attempts
@@ -150,7 +150,7 @@ sameSite: "strict"
 
 ---
 
-## ✅ Anti-Enumeration
+## Anti-Enumeration
 
 Generic error messages:
 
@@ -160,7 +160,7 @@ Generic error messages:
 
 ---
 
-## ✅ Role-Based Access Control
+## Role-Based Access Control
 
 Roles:
 
@@ -171,7 +171,7 @@ Access is controlled via JWT payload and middleware.
 
 ---
 
-## ✅ OAuth Integration
+## OAuth Integration
 
 * Google OAuth using Passport
 * Users are created automatically if they don’t exist
@@ -179,35 +179,9 @@ Access is controlled via JWT payload and middleware.
 
 ---
 
-# 📁 Project Structure (Simplified)
+## Testing Strategy
 
-```
-/config
-  googleOauth.js
-
-/controllers
-  auth.js
-
-/middleware
-  authMiddleware.js
-  errorHandler.js
-
-/models
-  user.js
-
-/routes
-  auth.js
-  index.js
-
-/app.js
-/server.js
-```
-
----
-
-# 🧪 Testing Strategy
-
-## 🔍 Approach
+## Approach
 
 * Manual API testing using Postman
 * Simulated edge cases:
@@ -219,49 +193,39 @@ Access is controlled via JWT payload and middleware.
 
 ---
 
-## 🐛 Issues Found & Fixes
+## Issues Found & Fixes
 
 | Issue               | Fix                                 |
 | ------------------- | ----------------------------------- |
-| Duplicate responses | Ensured single response per request |
 | Token mismatch      | Unified access token strategy       |
 | CSRF errors         | Scoped middleware correctly         |
 | Session fixation    | Added session regeneration          |
 
 ---
 
-## 🧠 Prioritization Strategy
+## Tejiri's Reflection Checkpoint
 
-1. Critical security vulnerabilities (auth bypass, token leaks)
-2. Authentication logic bugs
-3. UX issues (unnecessary redirects, errors)
-4. Performance & cleanup
+### Authentication Method Choice
 
----
-
-# 🧠 Reflection Checkpoint
-
-## 🔹 Authentication Method Choice
-
-I chose a **hybrid authentication system combining JWT and session-based authentication**. JWT was used for stateless authentication and scalability, while sessions were retained for OAuth flows. My decision was influenced by prior experience with SPA applications where JWT simplifies API communication, and OAuth requires session handling for secure third-party authentication.
+I chose a hybrid authentication system combining JWT and session-based authentication. JWT was used for stateless authentication and scalability, while sessions were retained for OAuth flows. My decision was influenced by prior experience with SPA applications where JWT simplifies API communication, and OAuth requires session handling for secure third-party authentication.
 
 ---
 
-## 🔹 Access Control Structure
+## Access Control Structure
 
-I implemented a **role-based access control (RBAC)** system with two roles: `user` and `admin`. This approach was chosen for simplicity and scalability. The main challenge was ensuring role validation remained consistent across both JWT-protected routes and frontend routing without duplicating logic.
-
----
-
-## 🔹 Security vs User Experience Trade-offs
-
-A key trade-off was between **security and seamless user experience**. Short-lived access tokens improve security but can interrupt users if not handled properly. To solve this, I implemented a **refresh token system** that silently renews access tokens without requiring re-login. The challenge was ensuring this flow remained secure while being invisible to the user.
+I implemented a role-based access control (RBAC) system with two roles: `user` and `admin`. This approach was chosen for simplicity and scalability. The main challenge was ensuring role validation remained consistent across both JWT-protected routes and frontend routing without duplicating logic.
 
 ---
 
-## 🔹 Token Storage Strategy
+## Security vs User Experience Trade-offs
 
-I used a **hybrid storage approach**:
+A key trade-off was between security and seamless user experience. Short-lived access tokens improve security but can interrupt users if not handled properly. To solve this, I implemented a refresh token system that silently renews access tokens without requiring re-login. The challenge was ensuring this flow remained secure while being invisible to the user.
+
+---
+
+## Token Storage Strategy
+
+I used a hybrid storage approach:
 
 * Access tokens in localStorage (for ease of use)
 * Refresh tokens in HttpOnly cookies (for security)
@@ -270,9 +234,9 @@ This decision balances usability with protection against XSS attacks. One challe
 
 ---
 
-## 🔹 Security Risks & Mitigation
+## Security Risks & Mitigation
 
-### Identified Risks:
+### Identified Risks
 
 * XSS attacks
 * CSRF attacks
@@ -280,7 +244,7 @@ This decision balances usability with protection against XSS attacks. One challe
 * Session fixation
 * Token theft
 
-### Mitigations:
+### Mitigations
 
 * HttpOnly cookies for refresh tokens
 * CSRF middleware protection
@@ -290,7 +254,7 @@ This decision balances usability with protection against XSS attacks. One challe
 
 ---
 
-## 🔹 Session Security & Usability
+## Session Security & Usability
 
 To secure sessions, I:
 
@@ -302,7 +266,7 @@ The challenge was ensuring these measures did not disrupt the user experience. T
 
 ---
 
-## 🔹 Testing & Robustness
+## Testing & Robustness
 
 I tested the system by simulating:
 
@@ -311,7 +275,7 @@ I tested the system by simulating:
 * Multiple failed login attempts
 * Missing CSRF tokens
 
-### Vulnerabilities Found:
+### Vulnerabilities Found
 
 * Duplicate response handling
 * Incorrect token flow
@@ -321,24 +285,5 @@ All were resolved by restructuring middleware and enforcing strict validation.
 
 ---
 
-# 🚀 Conclusion
-
-This project demonstrates a **secure, scalable, and user-friendly authentication system** that follows modern best practices. It balances:
-
-* 🔐 Security (token strategy, CSRF, rate limiting)
-* ⚡ Performance (stateless JWT)
-* 👤 User Experience (silent refresh, OAuth)
-
----
-
-# 📌 Future Improvements
-
-* Refresh token rotation
-* Device/session tracking
-* Multi-factor authentication (MFA)
-* Audit logs for security monitoring
-
----
-
-**Author:** Your Name
+**Author:** Tejiri Makele
 **Project:** Secure Authentication System
