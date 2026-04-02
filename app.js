@@ -5,13 +5,15 @@ import { intError, notFound } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
 import cors from "cors";
 import path from "path";
-import bodyParser from "body-parser";
-
+import session from "express-session";
+import passport from "passport";
+import googleOAuth from "./config/googleOauth.js";
+import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(express.json());
 app.use(compression());
 
@@ -51,14 +53,36 @@ if (isDev) {
   );
 }
 
-if (isDev) {
+const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : [];
+
+
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: allowedOrigins,
       credentials: true,
     })
   );
-}
+
+  app.use(cookieParser());
+
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI, collectionName: "sessions" }),
+  cookie: {
+    secure: !isDev,
+    httpOnly: true,
+    sameSite: isDev ? "lax" : "strict",
+    maxAge: 15  * 60 * 1000,
+  }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+googleOAuth();
 
 app.use("/uploads", express.static("uploads"));
 
