@@ -7,7 +7,7 @@ import cors from "cors";
 import path from "path";
 import session from "express-session";
 import passport from "passport";
-import {GoogleOAuth} from "./config/googleOauth.js";
+import googleOAuth from "./config/googleOauth.js";
 import MongoStore from "connect-mongo";
 import cookieParser from "cookie-parser";
 
@@ -82,7 +82,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-GoogleOAuth();
+googleOAuth();
 
 app.use("/uploads", express.static("uploads"));
 

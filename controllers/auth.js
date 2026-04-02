@@ -46,7 +46,7 @@ export const regAuth = async (req, res) => {
 
 export const generateAccessToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, username: user.username, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "15m" }
   );
@@ -54,7 +54,7 @@ export const generateAccessToken = (user) => {
 
 export const generateRefreshToken = (user) => {
   return jwt.sign(
-    { id: user._id },
+    { id: user._id, role: user.role, username: user.username, email: user.email },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: "7d" }
   );
@@ -92,6 +92,7 @@ export const loginAuth = async (req, res) => {
 
     userExist.loginAttempts = 0;
     userExist.lockUntil = null;
+    await userExist.save();
 
     req.session.regenerate(async (err) => {
       if (err) {
@@ -119,6 +120,7 @@ export const loginAuth = async (req, res) => {
       user: {
         id: userExist._id,
         username: userExist.username,
+        email: userExist.email,
         role: userExist.role,
       },
       token: accessToken,
@@ -200,50 +202,21 @@ export const verifyEmailAuth = async (req, res) => {
   res.status(200).json({ message: "Email verification endpoint" });
 };
 
-export const googleAuth = async (req, res) => {
-  passport.authenticate(
-    "google",
-    { scope: ["profile", "email"] },
-    (err, user, info) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ message: "Authentication error", error: err });
-      }
-      if (!user) {
-        return res.status(401).json({ message: "Authentication failed", info });
-      }
-      req.logIn(user, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Login error", error: err });
-        }
-        res.status(200).json({ message: "Authentication successful", user });
-      });
-    }
-  )(req, res);
-};
+export const googleAuth = passport.authenticate("google", { 
+  scope: ["profile", "email"],
+  session: false 
+});
 
-export const googleCallbackAuth = async (req, res) => {
-  passport.authenticate(
-    "google",
-    { failureRedirect: "/login" },
-    (err, user) => {
-      if (err || !user) {
-        return res.redirect("http://localhost:5173/login");
-      }
-      req.logIn(user, (err) => {
-        if (err) {
-          return res.redirect("/http://localhost:5173/login");
-        }
-        const token = jwt.sign(
-          { id: user._id, role: user.role },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        );
-        res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
-      });
+export const googleCallbackAuth = async (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user, info) => {
+    if (err || !user) {
+      return res.redirect("http://localhost:5173/login?error=auth_failed");
     }
-  );
+
+    const token = generateAccessToken(user);
+
+    res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
+  })(req, res, next);
 };
 
 export const getProfileAuth = async (req, res) => {
@@ -257,8 +230,22 @@ export const getProfileAuth = async (req, res) => {
 };
 
 export const adminAuth = async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password -googleId -isEmailVerified -_id -createdAt -updatedAt -__v");
-  res.status(200).json({ message: "Admin access granted", user });
+  try {
+   
+    const user = await User.findById(req.user.id)
+      .select("-password -googleId -isEmailVerified -createdAt -updatedAt -__v");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ 
+      message: "Admin access granted", 
+      user 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error during admin auth" });
+  }
 };
 
 export const refreshTokenAuth = async (req, res) => {

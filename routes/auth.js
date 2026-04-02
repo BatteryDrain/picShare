@@ -7,7 +7,7 @@ import { csrfProtection } from "../config/csrfConfig.js";
 import {regAuth, csrfTokenAuth, loginAuth, logoutAuth, resetPasswordAuth, forgotPasswordAuth, getProfileAuth, googleAuth, googleCallbackAuth, verifyEmailAuth, adminAuth, refreshTokenAuth} from "../controllers/auth.js";
 const router = express.Router();
 
-router.post("/login", noStore, csrfProtection, authLimiter, loginAuth);
+router.post("/login", noStore, authLimiter, loginAuth);
 router.post("/register", noStore, regAuth);
 router.post("/logout", noStore , logoutAuth);
 router.post("/refresh", noStore, refreshTokenAuth);
