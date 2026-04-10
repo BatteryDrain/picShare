@@ -1,6 +1,8 @@
 import express from 'express';
 import { publicCache, privateCache, noStore } from '../middleware/cache.js';
-import { upload } from '../middleware/upload.js';
+import { uploadPhoto } from '../middleware/upload.js';
+import { downloadPhoto } from '../middleware/download.js';
+import { uploadPhotoController } from '../controllers/photo.js';
 
 const router = express.Router();
 
@@ -13,11 +15,9 @@ router.get('/explore', publicCache(60), (req, res) => {
     res.send("Get Explore Photos Endpoint");
 });
 
-router.post('/', noStore, upload.single('photo'), (req, res) => {
-    res.send("Upload Photo Endpoint");
-}); 
+router.post('/', noStore, uploadPhoto.single('photo'), uploadPhotoController ); 
 
-router.get('/:id/download', privateCache(86400), (req, res) => {
+router.get('/:id/download', privateCache(86400), downloadPhoto, (req, res) => {
     res.send("Download Photo Endpoint");
 });
 
@@ -33,7 +33,7 @@ router.delete('/:id/comments/:commentId', noStore, (req, res) => {
     res.send("Delete Comment from Photo Endpoint");
 });
 
-router.get('/:id/likes', noStore, (req, res) => {
+router.get('/:id/likes', publicCache(30), (req, res) => {
     res.send("Get Photo Likes Endpoint");
 });
 

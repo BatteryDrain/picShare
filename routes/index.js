@@ -6,7 +6,7 @@ import photoRoutes from './photos.js';
 
 const router = express.Router();
 
-router.use('/auth', authRoutes);
+router.use('/', authRoutes);
 router.use('/user', userRoutes);
 router.use('/photos', photoRoutes);
 

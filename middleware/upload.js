@@ -4,7 +4,7 @@ import crypto from "crypto";
 import fs from "fs";
 
 
-const uploadDir = "uploads";
+const uploadDir = path.resolve("uploads");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   if (!allowedTypes.includes(file.mimetype)) {
-    cb(new Error("Invalid file type. Only JPEG, PNG, WEBP allowed."));
+    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE","Invalid file type. Only JPEG, PNG, WEBP allowed."));
   } else {
     cb(null, true);
   }
@@ -38,6 +38,7 @@ export const upload = multer({
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024,
+    files: 1,
   },
 });
 

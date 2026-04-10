@@ -1,31 +1,23 @@
 import express from "express";
-import { noStore } from "../middleware/cache.js";
-
+import { noStore} from "../middleware/cache.js";
+import { authLimiter } from "../middleware/limiter.js"; 
+import { authMiddleware } from "../middleware/auth.js";
+import { authorize } from "../middleware/authorize.js";
+import { csrfProtection } from "../config/csrfConfig.js";
+import {regAuth, csrfTokenAuth, loginAuth, logoutAuth, resetPasswordAuth, forgotPasswordAuth, getProfileAuth, googleAuth, googleCallbackAuth, verifyEmailAuth, adminAuth, refreshTokenAuth} from "../controllers/auth.js";
 const router = express.Router();
 
-router.post("/login", noStore, (req, res) => {
-   res.send("Login Endpoint");
-});
-router.post("/register", noStore, (req, res) => {
-    res.send("Register Endpoint");
-});
-router.post("/logout", noStore, (req, res) => {
-    res.send("Logout Endpoint");
-});
-router.post("/refresh", noStore, (req, res) => {
-    res.send("Refresh Token Endpoint");
-});
-router.post("/forgot-password", noStore, (req, res) => {
-    res.send("Forgot Password Endpoint");
-});
-router.post("/reset-password", noStore, (req, res) => {
-    res.send("Reset Password Endpoint");
-});
-router.post("/verify-email", noStore, (req, res) => {
-    res.send("Verify Email Endpoint");
-});
-router.get("/profile", noStore, (req, res) => {
-    res.send("Get User Profile Endpoint");
-});
+router.post("/login", noStore, authLimiter, loginAuth);
+router.post("/register", noStore, regAuth);
+router.post("/logout", noStore , logoutAuth);
+router.post("/refresh", noStore, refreshTokenAuth);
+router.post("/forgot-password", noStore, forgotPasswordAuth);
+router.post("/reset-password", noStore, resetPasswordAuth);
+router.post("/verify-email", noStore, verifyEmailAuth);
+router.get("/profile", noStore, authMiddleware, authorize("user"), getProfileAuth);
+router.get("/auth/google", noStore, googleAuth);
+router.get("/auth/google/callback", noStore, googleCallbackAuth);
+router.get("/admin", noStore, authMiddleware, authorize("admin"), adminAuth);
+router.get("/csrf-token", noStore, csrfProtection, csrfTokenAuth);
 
 export default router;
