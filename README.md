@@ -13,8 +13,6 @@ git clone <repo-url>
 cd <project-folder>
 ```
 
----
-
 ## 2. Install Dependencies
 
 ```bash
@@ -46,8 +44,8 @@ npm start
 
 ## Application Access
 
-Frontend: http://localhost:3000
-Backend API: http://localhost:3001/api/v1
+Frontend: [http://localhost:3000](http://localhost:3000)
+Backend API: [http://localhost:3001/api/v1](http://localhost:3001/api/v1)
 
 Input Validation Techniques
 
@@ -98,17 +96,17 @@ email: safeDecrypt(user.email)
 
 React automatically escapes output:
 
-<p>{user.bio}</p>
+{user.bio}
 
 Example
 
 Input:
 
-<script>alert("XSS")</script>
+`<script>alert("XSS")</script>`
 
 Rendered Output:
 
-<script>alert("XSS")</script>
+`<script>alert("XSS")</script>`
 
 Displayed safely, NOT executed
 
