@@ -356,3 +356,340 @@ All were resolved by restructuring middleware and enforcing strict validation.
 ---
 
 **Author:** Tejiri Makele
+
+⚠️ Vulnerabilities from Improper Input Validation
+
+Improper input validation can introduce several serious security risks:
+
+1. Cross-Site Scripting (XSS)
+
+Attackers can inject malicious scripts (e.g., <script>alert(1)</script>) into input fields such as name or bio. If not handled properly, these scripts can execute in other users’ browsers.
+
+2. NoSQL Injection
+
+In MongoDB-based applications, attackers can manipulate queries using payloads like:
+
+{ "email": { "$ne": null } }
+
+This can bypass authentication or alter database queries if inputs are not strictly validated.
+
+3. Denial of Service (DoS)
+
+Allowing excessively large inputs can overload the server, leading to performance degradation or crashes.
+
+4. Data Integrity Issues
+
+Invalid or unexpected data formats (e.g., malformed emails or unsupported characters) can corrupt stored data and break application logic.
+
+5. Mass Assignment Attacks
+
+If input fields are not strictly controlled, attackers may inject additional properties (e.g., role: "admin") to escalate privileges.
+
+✅ Mitigation Strategies Implemented
+Strict regex-based validation
+Input sanitization to remove malicious content
+Payload size limits
+Whitelisting allowed fields
+🛡️ How Output Encoding Prevents XSS
+
+Output encoding ensures that user input is treated as data, not executable code.
+
+Example
+
+Malicious Input:
+
+<script>alert("Hacked")</script>
+
+Encoded Output:
+
+&lt;script&gt;alert("Hacked")&lt;/script&gt;
+
+Instead of executing, the content is displayed safely as text.
+
+Key Concept
+
+Output encoding converts special characters (<, >, ", ') into harmless representations.
+
+Implementation Notes
+React automatically escapes content during rendering
+Backend validation removes HTML tags before storage
+Result
+
+This layered approach ensures:
+
+Malicious scripts are not stored
+Even if stored, they are not executed
+🔐 Encryption Challenges and Solutions
+1. Choosing the Right Encryption Method
+
+Challenge: Initially used a third-party library for encryption.
+Issue: Less secure and not ideal for backend systems.
+
+Solution:
+
+Switched to Node.js built-in crypto
+Implemented AES-256-GCM for strong encryption and integrity protection
+2. Encrypted Data Cannot Be Queried
+
+Challenge: Encrypted email fields cannot be searched or validated for uniqueness.
+
+Solution:
+
+Used a hybrid approach:
+Store encrypted email for privacy
+Store hashed email (SHA-256) for lookup and uniqueness checks
+3. Decryption Failures
+
+Challenge: Decryption may fail due to:
+
+Corrupted data
+Changed encryption keys
+Legacy unencrypted values
+
+Solution:
+
+Implemented a safe decryption wrapper:
+try {
+  return decrypt(value);
+} catch {
+  return null;
+}
+4. Re-encrypting Unchanged Data
+
+Challenge: Encryption produces different outputs each time, causing unnecessary database updates.
+
+Solution:
+
+Only encrypt fields when they are modified
+Avoid redundant writes
+5. Key Management
+
+Challenge: Risk of exposing or using weak encryption keys.
+
+Solution:
+
+Store keys in environment variables (.env)
+Use strong, randomly generated keys (32+ characters)
+Never hardcode secrets in source code
+🧠 Key Takeaways
+Input validation is essential to prevent injection attacks, XSS, and data corruption.
+Output encoding ensures user data is displayed safely without executing malicious code.
+Encryption protects sensitive data but introduces challenges like searchability and key management.
+A defense-in-depth approach—combining validation, sanitization, encryption, and encoding—is critical for building secure applications.
+
+This workflow automates dependency maintenance by:
+
+Running npm audit fix on a scheduled basis
+Creating a pull request with safe updates
+Ensuring updates go through a controlled review process (tj → staging → main)
+
+This helps keep the application secure and up to date without introducing breaking changes automatically.
+
+Workflow Breakdown
+Permissions
+contents: write → allows committing dependency updates
+pull-requests: write → allows creating pull requests
+
+Trigger
+
+Runs automatically every Sunday at midnight
+Can also be triggered manually
+
+Job Configuration
+
+Executes the workflow in a Linux environment
+
+Checkout Branch
+
+Checks out the tj branch
+Ensures updates are applied to a safe development branch, not main
+
+Setup Node
+
+Installs Node.js v22
+Enables dependency caching for faster builds
+
+Install Dependencies
+
+Performs a clean install using package-lock.json
+Ensures consistency across environments
+
+Audit and Fix Vulnerabilities
+
+Scans dependencies for vulnerabilities
+Automatically applies non-breaking fixes only
+Updates package-lock.json (and sometimes package.json
+
+Create Pull Request
+
+Creates a new branch: tj-auto-updates
+Commits dependency updates
+Opens a pull request targeting the staging branch
+
+Interpreting npm audit Output
+
+Low Severity Vulnerability
+
+cookie <0.7.0 → vulnerable
+Used by csurf
+
+Interpretation
+Vulnerability exists in a transitive dependency
+Severity is low
+Fix may require breaking changes
+
+Decision Strategy
+
+| Scenario                     | Action                           |
+| ---------------------------- | -------------------------------- |
+| Low severity, no safe fix    | Accept temporarily, monitor      |
+| Fix available (non-breaking) | Apply via npm audit fix          |
+| Fix requires breaking change | Review manually before upgrading |
+| Critical vulnerability       | Prioritize immediate update      |
+
+The vulnerability exists in a transitive dependency (cookie) used by csurf. Since it is low severity and not directly exploitable in our architecture, I avoided using npm audit fix --force to prevent breaking changes. Instead, We documented the issue and plan to migrate away from csurf to a modern CSRF protection strategy using SameSite cookies and origin validation.
+
+Why Outdated Third-Party Libraries Are Risky
+
+Using outdated dependencies can lead to:
+
+Security vulnerabilities (e.g., XSS, injection attacks)
+Unpatched exploits known publicly
+Compatibility issues with newer runtimes (Node 22)
+Performance degradation
+Loss of community support
+
+How Automation Helps
+
+Automation improves dependency management by:
+
+Ensuring regular security checks
+Reducing manual effort
+Catching vulnerabilities early
+Maintaining consistency across environments
+Enforcing a structured update workflow (via pull requests)
+
+Risks of Automation
+
+While useful, automation introduces risks:
+
+1. Silent Breaking Changes
+
+Even safe updates can occasionally affect behavior.
+
+2. Over-reliance on Tools
+
+Developers may ignore audit reports without understanding them.
+
+3. Dependency Conflicts
+
+Automatic updates may introduce version incompatibilities.
+
+4. False Sense of Security
+
+Not all vulnerabilities are critical or exploitable in your context.
+
+Security Testing
+
+To ensure the application is secure, multiple test scenarios were simulated to validate protection against:
+
+Cross-Site Scripting (XSS)
+Injection attacks (including NoSQL-style injections)
+Improper input handling
+
+1. XSS Attack Testing
+🧪 Test Inputs
+
+```html
+<script>alert("XSS")</script>
+<img src=x onerror=alert(1)>
+<b>bold</b>
+```
+
+Result
+Frontend validation blocked:
+HTML tags (/<[^>]*>?/)
+Invalid characters
+Backend sanitization (via xss or similar) ensures:
+No script is stored
+React automatically escapes output:
+Prevents execution even if malicious data slips through
+
+2. Injection Testing (NoSQL Injection)
+🧪 Test Payloads
+
+```json
+{ "email": { "$ne": null } }
+{ "username": { "$gt": "" } }
+```
+
+Inputs should be treated strictly as strings
+Objects or operators ($ne, $gt) should be rejected
+
+Result
+Frontend restricts input format (regex)
+Backend validation ensures:
+Only expected data types are accepted
+Mongoose schema + validation prevents query manipulation
+
+Edge Case Testing
+🧪 Large Input
+
+Bio with 10,000+ characters is rejected due to maxLength
+
+🧪 Special Characters
+
+Bio: <script> or && || {}
+This is rejected by regex validation
+
+Empty Submission
+
+Handled via validation checks before submission
+
+TJ Reflection Checkpoint
+Which vulnerabilities were most challenging to address?
+
+The most challenging vulnerability to address was XSS (Cross-Site Scripting).
+
+Why:
+It can occur at multiple layers:
+Input stage (user enters malicious code)
+Storage stage (malicious code saved in DB)
+Output stage (code rendered in UI)
+Even if one layer fails, the system can be compromised
+
+How it was resolved:
+Frontend validation blocks HTML input
+Backend sanitization removes malicious payloads
+React automatically escapes output
+
+What additional testing tools or strategies could improve the process?
+
+🔧 1. Automated Security Scanners
+npm audit → dependency vulnerabilities
+SAST tools (e.g., static analysis)
+
+🔍 2. Dynamic Testing Tools
+OWASP ZAP → simulate real attack scenarios
+Burp Suite → intercept and manipulate requests
+
+🧪 3. Unit & Integration Testing
+Test validation functions with malicious inputs
+Test API endpoints with injection payloads
+
+🔐 4. Fuzz Testing
+Send random/unexpected inputs to detect edge-case failures
+
+📊 5. Logging & Monitoring
+Track suspicious input patterns
+Detect repeated malicious attempts
+
+TJ's Challenges
+
+Balancing security vs usability
+
+Challenges:
+
+Encryption breaks search/uniqueness
+Validation must be strict but flexible
+Handling corrupted encrypted data safely

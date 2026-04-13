@@ -4,7 +4,7 @@ export const authorize = (roles = []) => {
         .map(role => role.toLowerCase());
 
     return (req, res, next) => {
-        // 2. Get the role from the decoded JWT (which was set by your authenticate middleware)
+        // 2. Get the role from the decoded JWT 
         const userRole = req.user?.role?.toLowerCase();
 
         console.log("--- Authorization Check ---");
