@@ -2,7 +2,6 @@ import User from "../models/user.js";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import passport from "passport";
-import user from "../models/user.js";
 
 export const regAuth = async (req, res) => {
   try {
@@ -122,6 +121,7 @@ export const loginAuth = async (req, res) => {
         username: userExist.username,
         email: userExist.email,
         role: userExist.role,
+        bio: userExist.bio,
       },
       token: accessToken,
     });
@@ -219,15 +219,6 @@ export const googleCallbackAuth = async (req, res, next) => {
   })(req, res, next);
 };
 
-export const getProfileAuth = async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password -googleId -createdAt -updatedAt -__v");
-
-  if(!req.session.user) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  res.status(200).json({ message: "User profile",  user });
-};
 
 export const adminAuth = async (req, res) => {
   try {
@@ -273,4 +264,35 @@ export const refreshTokenAuth = async (req, res) => {
 export const csrfTokenAuth = (req, res) => {
   const csrfToken = req.csrfToken();
   res.json({ csrfToken });
+};
+
+export const sessionAuth = async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findById(req.user.id)
+      .select("-password -googleId -__v")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Session valid",
+      user: {
+        id: user._id.toString(),
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        bio: user.bio,
+      },
+    });
+  } catch (err) {
+
+    console.error("Session validation error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
