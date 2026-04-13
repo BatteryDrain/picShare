@@ -6,7 +6,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 
-
 const dirName = path.dirname(fileURLToPath(import.meta.url));
 
 // Serving http/https based on environment
