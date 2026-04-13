@@ -1,30 +1,8 @@
-# Secure Authentication System
+# Secure User Profile System
 
 ## Overview
 
-This project implements an authentication system using modern security practices while maintaining a smooth user experience. It supports:
-
-* Local authentication (username & password)
-* Secure password hashing with Argon2
-* JWT-based authentication (access + refresh tokens)
-* Google OAuth (SSO)
-* Role-based access control (RBAC)
-* CSRF protection
-* Rate limiting & account lockout
-* Session fixation prevention
-* Secure cookie handling
-
----
-
-## Tech Stack
-
-* **Backend:** Node.js, Express
-* **Database:** MongoDB (Atlas) & Compass
-* **Authentication:** JWT, Passport (Google OAuth)
-* **Security:** Argon2, Helmet, CSRF, Rate Limiting
-* **Session Store:** MongoDB (connect-mongo)
-
----
+This project is a full-stack web application implementing secure user authentication, profile management, and data protection techniques. It emphasizes input validation, output encoding, encryption, and secure session management.
 
 ## Installation & Setup
 
@@ -202,25 +180,14 @@ Scalable systems start with clear organization.
 
 ## 3. Environment Variables
 
-Create a `.env` file:
+Create .env files in both server and client directories.
 
 ```env
-PORT=5000
-NODE_ENV=development
-
-MONGO_URI=your_mongodb_connection
-SESSION_SECRET=your_session_secret
-
-JWT_SECRET=your_access_token_secret
-JWT_REFRESH_SECRET=your_refresh_token_secret
-
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
-
+PORT=3001
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
+ENCRYPTION_KEY=your_encryption_key
 ```
-
----
 
 ## 4. Run the Application
 
@@ -234,272 +201,274 @@ or
 npm start
 ```
 
----
+## Application Access
 
-## Authentication Architecture
+Frontend: http://localhost:3000
+Backend API: http://localhost:3001/api/v1
 
-## Token Strategy
+Input Validation Techniques
 
-| Token Type    | Storage         | Expiry     |
-| Access Token  | localStorage    | 15 minutes |
-| Refresh Token | HttpOnly Cookie | 7 days     |
+All incoming data is validated and sanitized using:
 
----
+validateAndSanitize(req.body)
 
-## Flow
+| Field    | Rule                        |
+| -------- | --------------------------- |
+| Email    | Must match regex format     |
+| Username | Required, trimmed           |
+| Bio      | Max 500 chars, no HTML tags |
 
-1. User logs in, receives access token + refresh token cookie
-2. Access token used for API requests
-3. When expired, frontend calls `/refresh`
-4. Backend validates refresh token and issues new access token
+Techniques Used
+Regex validation
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
----
+HTML stripping
+/<[^>]*>?/
 
-## Security Features
+Length restriction
+bio.length <= 500
 
-## Password Security
+## Attack Mitigation
 
-* Argon2 hashing
-* No plaintext password storage
+| Attack Type     | Mitigation         |
+| --------------- | ------------------ |
+| XSS             | HTML filtering     |
+| SQL Injection   | Mongoose ORM       |
+| NoSQL Injection | Input sanitization |
+| Data Pollution  | Strict validation  |
 
-## Local Authentication (Username & Password)
+Edge Cases Handled
+Empty inputs → rejected
+Long payloads → rejected
+Script tags → stripped
+Invalid emails → blocked
 
-**Flow**
-User submits credentials (username + password)
-Server validates input
-Server retrieves user from database
-Password is verified using hashing
-Tokens are issued upon successful authentication
+## Output Encoding Methods
 
-**Password Hashing with Argon2**
-Passwords are never stored in plaintext. Instead, they are hashed using Argon2, a modern and secure hashing algorithm designed to resist brute-force and GPU-based attacks.
+### Backend
 
-**Security Benefits**
-Prevents password exposure if database is compromised
-Protects against rainbow table attacks
-Ensures each password hash is unique
+Sensitive fields are decrypted safely:
 
-## Single Sign-On (SSO)
+email: safeDecrypt(user.email)
 
-The system integrates SSO using Google OAuth 2.0, allowing users to authenticate via their Google accounts.
+### Frontend
 
-**OAuth Flow**
-User clicks “Continue with Google”
-Redirected to Google login page
-Google authenticates user
-Callback returns user profile
-Server:
-Finds or creates user
-Issues JWT
-User is redirected back to frontend
+React automatically escapes output:
 
-## OAuth Integration
+<p>{user.bio}</p>
 
-* Google OAuth using Passport
-* Users are created automatically if they don’t exist
-* JWT issued after successful authentication
+Example
 
-**Security Benefits**
-No password storage required for SSO users
-Delegates authentication to trusted provider
-Reduces risk of credential theft
+Input:
 
----
+<script>alert("XSS")</script>
 
-## Session Security
+Rendered Output:
 
-* Session ID regeneration after login
-* Prevents session fixation attacks
+<script>alert("XSS")</script>
 
----
+Displayed safely, NOT executed
 
-## CSRF Protection
+## Protection Summary
 
-Because cookies are used, the system implements Cross-Site Request Forgery (CSRF) protection.
+| Scenario         | Protection       |
+| ---------------- | ---------------- |
+| Script injection | Rendered as text |
+| HTML payload     | Escaped          |
+| Stored XSS       | Neutralized      |
 
-* Implemented using `csurf`
-* Applied only to sensitive routes
-* Token fetched via `/csrf-token`
-* Server generates a CSRF token
-* Frontend includes token in requests
-* Server validates token before processing
+Libraries / Mechanisms
+React (auto-escaping JSX)
+Custom safeDecrypt
+No dangerouslySetInnerHTML
 
-### Security Benefit
+## Encryption Techniques
 
-Prevents attackers from:
-Forcing users to perform actions unknowingly
-Exploiting authenticated sessions
+Sensitive data is encrypted before storage:
 
----
+updateData.email = encrypt(email);
+updateData.bio = encrypt(bio);
 
-## Cookie Security
+## Encryption Flow
 
-```js
-httpOnly: true
-secure: true (production)
-sameSite: "strict"
-```
+User submits data
+Data validated
+Data encrypted
+Stored in DB
+Decrypted when needed
 
----
+## Strategy
 
-## Rate Limiting & Account Lockout
+AES-based symmetric encryption
 
-* 10 requests per 15 minutes (IP-based)
-* Account locked after 5 failed attempts
-* Lock duration: 15 minutes
+Applied to:
 
----
+- Email
+- Bio
 
-## Anti-Enumeration
+## Security Benefits
 
-Generic error messages:
+| Benefit         | Description             |
+| --------------- | ----------------------- |
+| Data at rest    | Encrypted               |
+| Confidentiality | Protected               |
+| Secure access   | Backend-only decryption |
 
-```json
-"Invalid username or password"
-```
+## Dependency Management
 
----
+Tools Used
 
-## Role-Based Access Control
+- Express
+- Mongoose
+- JWT Authentication
+- Custom Encryption Utilities
 
-Roles:
+## Best Practices
 
-* `user`
-* `admin`
+Lock versions (package-lock.json)
+Run audits:
+npm audit fix
+Avoid deprecated packages
+Minimize dependencies
 
-Access is controlled via JWT payload and middleware.
+## Risks Managed
 
-**User Role**
-Permissions:
-Access personal dashboard
-Perform authenticated user actions
+| Risk                 | Mitigation     |
+| -------------------- | -------------- |
+| Vulnerable packages  | Regular audits |
+| Supply chain attacks | Minimal deps   |
+| Version conflicts    | Lockfiles      |
 
-Restrictions:
-Cannot access admin routes
+## Vulnerabilities from Improper Validation
 
-**Admin Role**
-Permissions:
-Access admin dashboard
+1. XSS
 
-Restrictions:
-Cannot access a user dashboard as admin
+`<script>alert(1)</script>`
 
-### RBAC Middleware Design
+1. NoSQL Injection
+`{ "email": { "$ne": null } }`
 
-Authorization is enforced using middleware that:
-Verifies the JWT
-Extracts user role
-Checks if role has permission
-Grants or denies access
+1. DoS
 
-RBAC is also enforced on our frontend as well.
+Large payloads overload server
 
----
+1. Data Integrity Issues
 
-## Testing Strategy
+Malformed data breaks logic
 
-## Approach
+1. Mass Assignment
+{ "role": "admin" }
 
-* Manual API testing using Postman
-* Simulated edge cases:
+## Mitigation Strategies
 
-  * Invalid login attempts
-  * Token expiration
-  * Missing/invalid refresh tokens
-  * CSRF token absence
+Regex validation
+Sanitization
+Payload limits
+Field whitelisting
 
----
+## Output Encoding (Deep Dive)
 
-## Issues Found & Fixes
+Concept
 
-| Issue               | Fix                                 |
-| ------------------- | ----------------------------------- |
-| Token mismatch      | Unified access token strategy       |
-| CSRF errors         | Scoped middleware correctly         |
-| Session fixation    | Added session regeneration          |
+Encoding converts:
 
----
+< > " '
 
-## Tejiri's Reflection Checkpoint
+into safe equivalents
 
-### Authentication Method Choice
+Result
 
-I chose a hybrid authentication system combining JWT and session-based authentication. JWT was used for stateless authentication and scalability, while sessions were retained for OAuth flows. My decision was influenced by prior experience with SPA applications where JWT simplifies API communication, and OAuth requires session handling for secure third-party authentication.
+- Scripts are not executed
+- Data is safely displayed
 
----
+## Encryption Challenges & Solutions
 
-## Access Control Structure
+### Choosing Encryption
 
-I implemented a role-based access control (RBAC) system with two roles: `user` and `admin`. This approach was chosen for simplicity and scalability. The main challenge was ensuring role validation remained consistent across both JWT-protected routes and frontend routing without duplicating logic.
+Solution: AES-256 (Node crypto)
 
----
+### Cannot Query Encrypted Data
 
-## Security vs User Experience Trade-offs
+Solution:
 
-A key trade-off was between security and seamless user experience. Short-lived access tokens improve security but can interrupt users if not handled properly. To solve this, I implemented a refresh token system that silently renews access tokens without requiring re-login. The challenge was ensuring this flow remained secure while being invisible to the user.
+- Store encrypted value
+- Store hashed value for lookup
 
----
+### Re-encryption Issues
 
-## Token Storage Strategy
+Solution:
 
-I used a hybrid storage approach:
+Only encrypt changed fields
 
-* Access tokens in localStorage (for ease of use)
-* Refresh tokens in HttpOnly cookies (for security)
+### Key Management
 
-This decision balances usability with protection against XSS attacks. One challenge was managing CORS and cookie configurations correctly across environments.
+- Store in .env
+- Use strong keys
+- Never hardcode
 
----
+## Automated Dependency Updates
 
-## Security Risks & Mitigation
+Workflow Features
 
-### Identified Risks
+- Runs weekly
+- Uses npm audit fix
+- Creates PR: tj → staging → main
 
-* XSS attacks
-* CSRF attacks
-* Brute-force login attempts
-* Session fixation
-* Token theft
+Workflow Steps
 
-### Mitigations
+- Checkout tj branch
+- Install Node.js
+- Install dependencies
+- Run audit fix
+- Create PR
 
-* HttpOnly cookies for refresh tokens
-* CSRF middleware protection
-* Rate limiting + account lockout
-* Session regeneration after login
-* Generic error messages to prevent enumeration
+## Audit Strategy
 
----
+| Scenario           | Action          |
+| ------------------ | --------------- |
+| Low severity       | Monitor         |
+| Safe fix available | Apply           |
+| Breaking change    | Review          |
+| Critical issue     | Fix immediately |
 
-## Session Security & Usability
+## Automation Risks
 
-To secure sessions, I:
+- Silent breaking changes
+- Dependency conflicts
+- False sense of security
 
-* Regenerated session IDs after login
-* Limited token lifespan
-* Used secure cookie attributes
+## Lessons Learned
 
-The challenge was ensuring these measures did not disrupt the user experience. The refresh token system helped maintain continuity without forcing frequent logins.
+🔴 Challenge 1: Encrypted Data in UI
 
----
+Problem:
+Frontend received encrypted data
 
-## Testing & Robustness
+Solution:
+Decrypt in backend (safeDecrypt)
 
-I tested the system by simulating:
+🔴 Challenge 2: XSS Protection
 
-* Expired tokens
-* Invalid credentials
-* Multiple failed login attempts
-* Missing CSRF tokens
+Problem:
+Multi-layer vulnerability
 
-### Vulnerabilities Found
+Solution:
 
-* Duplicate response handling
-* Incorrect token flow
-* CSRF misconfiguration
+- Frontend validation
+- Backend sanitization
+- React escaping
 
-All were resolved by restructuring middleware and enforcing strict validation.
+## Trade-offs
 
----
+| Challenge            | Insight       |
+| -------------------- | ------------- |
+| Encryption vs search | Use hashing   |
+| Strict validation    | Balance UX    |
+| Data corruption      | Safe fallback |
 
-**Author:** Tejiri Makele
+## Key Takeaways
+
+Input validation prevents injection attacks
+Output encoding prevents execution
+Encryption protects sensitive data
+Defense-in-depth is essential

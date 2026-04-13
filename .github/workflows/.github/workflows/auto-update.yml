@@ -1,0 +1,48 @@
+name: Dependency Update
+
+permissions:
+  contents: write  #allows committing changes to the repository
+  pull-requests: write # allows creating pull requests
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # every Sunday
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tj branch
+        uses: actions/checkout@v4
+        with:
+          ref: tj # checkout the tj branch to ensure we are working with the latest code from this branch
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit fix
+        run: npm audit fix
+
+      - name: Create Pull Request to staging
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: auto fix vulnerabilities"
+          branch: tj-auto-updates
+          branch-suffix: timestamp
+          base: staging
+          title: "Auto Dependency Updates"
+          body: |
+            This PR contains automated dependency updates using npm audit fix. Please review and merge into staging if tests pass.
+          add-paths: |
+            package.json
+            package-lock.json
+            delete-branch: true
