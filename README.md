@@ -47,7 +47,7 @@ npm start
 Frontend: [http://localhost:3000](http://localhost:3000)
 Backend API: [http://localhost:3001/api/v1](http://localhost:3001/api/v1)
 
-Input Validation Techniques
+## Input Validation Techniques
 
 All incoming data is validated and sanitized using:
 
@@ -59,14 +59,15 @@ validateAndSanitize(req.body)
 | Username | Required, trimmed           |
 | Bio      | Max 500 chars, no HTML tags |
 
-Techniques Used
-Regex validation
+## Techniques Used
+
+- Regex validation
 /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-HTML stripping
+- HTML stripping
 /<[^>]*>?/
 
-Length restriction
+- Length restriction
 bio.length <= 500
 
 ## Attack Mitigation
@@ -78,11 +79,12 @@ bio.length <= 500
 | NoSQL Injection | Input sanitization |
 | Data Pollution  | Strict validation  |
 
-Edge Cases Handled
-Empty inputs → rejected
-Long payloads → rejected
-Script tags → stripped
-Invalid emails → blocked
+## Edge Cases Handled
+
+- Empty inputs → rejected
+- Long payloads → rejected
+- Script tags → stripped
+- Invalid emails → blocked
 
 ## Output Encoding Methods
 
@@ -118,10 +120,11 @@ Displayed safely, NOT executed
 | HTML payload     | Escaped          |
 | Stored XSS       | Neutralized      |
 
-Libraries / Mechanisms
-React (auto-escaping JSX)
-Custom safeDecrypt
-No dangerouslySetInnerHTML
+## Libraries / Mechanisms
+
+- React (auto-escaping JSX)
+- Custom safeDecrypt
+- No dangerouslySetInnerHTML
 
 ## Encryption Techniques
 
@@ -132,11 +135,11 @@ updateData.bio = encrypt(bio);
 
 ## Encryption Flow
 
-User submits data
-Data validated
-Data encrypted
-Stored in DB
-Decrypted when needed
+- User submits data
+- Data validated
+- Data encrypted
+- Stored in DB
+- Decrypted when needed
 
 ## Strategy
 
@@ -166,11 +169,11 @@ Tools Used
 
 ## Best Practices
 
-Lock versions (package-lock.json)
-Run audits:
-npm audit fix
-Avoid deprecated packages
-Minimize dependencies
+- Lock versions (package-lock.json)
+- Run audits:
+- npm audit fix
+- Avoid deprecated packages
+- Minimize dependencies
 
 ## Risks Managed
 
@@ -202,10 +205,10 @@ Malformed data breaks logic
 
 ## Mitigation Strategies
 
-Regex validation
-Sanitization
-Payload limits
-Field whitelisting
+- Regex validation
+- Sanitization
+- Payload limits
+- Field whitelisting
 
 ## Output Encoding (Deep Dive)
 
