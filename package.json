@@ -1,21 +1,43 @@
 {
   "name": "picshare",
   "version": "1.0.0",
+  "type": "module",
   "description": "A secure, production-ready photo-sharing API built with Express.js, HTTPS, Helmet security headers, and optimized caching strategies.",
   "main": "app.js",
   "dependencies": {
+    "argon2": "^0.44.0",
+    "body-parser": "^2.2.2",
+    "compression": "^1.8.1",
+    "connect-mongo": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "csurf": "^1.11.0",
     "express": "^5.2.1",
-    "fs": "^0.0.1-security",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.19.0",
     "helmet": "^8.1.0",
-    "hsts": "^2.2.0",
-    "https": "^1.0.0"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.1",
+    "multer": "^2.0.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "validator": "^13.15.35",
+    "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "NODE_ENV=development nodemon --env-file=.env.local server.js",
+    "start": "NODE_ENV=production node server.js"
   },
-  "keywords": [],
+    "engines": {
+      "node": ">=22.0.0"
+    },
+  "keywords": [
+    ""
+  ],
   "author": "tejiri & ben",
   "license": "ISC"
 }

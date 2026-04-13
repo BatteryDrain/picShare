@@ -1,74 +1,317 @@
-# Secure Photo Sharing App
+# Secure User Profile System
 
-A secure, production-ready photo-sharing API built with Express.js, HTTPS, Helmet security headers, and optimized caching strategies.
+## Overview
 
-# Project Overview
+This project is a full-stack web application implementing secure user authentication, profile management, and data protection techniques. It emphasizes input validation, output encoding, encryption, and secure session management.
 
-This application allows users to:
+## Installation & Setup
 
-1. Create profiles
-2. Upload photos with descriptions and tags
-3. Like, share and comment on posts
-4. Follow photographers
-5. View a public feed
-6. Curate favorite galleries
+## 1. Clone the Repository
 
-# SSL Configuration
+```bash
+git clone <repo-url>
+cd <project-folder>
+```
 
-Production Method
-Let’s Encrypt + Certbot
+---
 
-Steps:
+## 2. Install Dependencies
 
+```bash
+npm install
+```
 
-Local Development
-OpenSSL Self-Signed Certificate
-- install openssl
-Generate:
-- openssl req -nodes -new -x509 -keyout private.key -out certificate.crt
+## 3. Environment Setup
 
-Used for local HTTPS testing only.
+Create .env files in both server and client directories.
 
-# Security Headers Implemented
+```env
+PORT=3001
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
+ENCRYPTION_KEY=your_encryption_key
+```
 
-Content-Security-Policy (CSP)
-X-Frame-Options (Clickjacking prevention)
-Strict-Transport-Security (HSTS)
-X-Content-Type-Options
-Referrer-Policy
+## 4. Run the Application
 
-# Caching Strategy
+```bash
+npm run dev
+```
 
-Before choosing caching strategies, we considered:
-1. Authentication data exposure (login/signup must never cache)
-2. User-specific content leaks
-3. Stale content issues (likes/comments changing frequently)
-4. Shared device/browser risks
-5. CDN/proxy caching of sensitive responses
-6. Token or session leakage
+or
 
-Route:
-Cache Strategy used:
-Why:
-Security consideration:
+```bash
+npm start
+```
 
+## Application Access
 
-# Trade-Offs
+Frontend: http://localhost:3000
+Backend API: http://localhost:3001/api/v1
 
+Input Validation Techniques
 
+All incoming data is validated and sanitized using:
 
-# Architecture
+validateAndSanitize(req.body)
 
-Express.js (Node.js)
-HTTPS Server (Node https module)
-Helmet Security Middleware
-MVC Structure
-Environment Config Support
+| Field    | Rule                        |
+| -------- | --------------------------- |
+| Email    | Must match regex format     |
+| Username | Required, trimmed           |
+| Bio      | Max 500 chars, no HTML tags |
 
-# Setup Instructions
+Techniques Used
+Regex validation
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-1. Install Dependencies
- - npm install
-2. Configure SSL
-3. Run Server
- - node server.js
+HTML stripping
+/<[^>]*>?/
+
+Length restriction
+bio.length <= 500
+
+## Attack Mitigation
+
+| Attack Type     | Mitigation         |
+| --------------- | ------------------ |
+| XSS             | HTML filtering     |
+| SQL Injection   | Mongoose ORM       |
+| NoSQL Injection | Input sanitization |
+| Data Pollution  | Strict validation  |
+
+Edge Cases Handled
+Empty inputs → rejected
+Long payloads → rejected
+Script tags → stripped
+Invalid emails → blocked
+
+## Output Encoding Methods
+
+### Backend
+
+Sensitive fields are decrypted safely:
+
+email: safeDecrypt(user.email)
+
+### Frontend
+
+React automatically escapes output:
+
+<p>{user.bio}</p>
+
+Example
+
+Input:
+
+<script>alert("XSS")</script>
+
+Rendered Output:
+
+<script>alert("XSS")</script>
+
+Displayed safely, NOT executed
+
+## Protection Summary
+
+| Scenario         | Protection       |
+| ---------------- | ---------------- |
+| Script injection | Rendered as text |
+| HTML payload     | Escaped          |
+| Stored XSS       | Neutralized      |
+
+Libraries / Mechanisms
+React (auto-escaping JSX)
+Custom safeDecrypt
+No dangerouslySetInnerHTML
+
+## Encryption Techniques
+
+Sensitive data is encrypted before storage:
+
+updateData.email = encrypt(email);
+updateData.bio = encrypt(bio);
+
+## Encryption Flow
+
+User submits data
+Data validated
+Data encrypted
+Stored in DB
+Decrypted when needed
+
+## Strategy
+
+AES-based symmetric encryption
+
+Applied to:
+
+- Email
+- Bio
+
+## Security Benefits
+
+| Benefit         | Description             |
+| --------------- | ----------------------- |
+| Data at rest    | Encrypted               |
+| Confidentiality | Protected               |
+| Secure access   | Backend-only decryption |
+
+## Dependency Management
+
+Tools Used
+
+- Express
+- Mongoose
+- JWT Authentication
+- Custom Encryption Utilities
+
+## Best Practices
+
+Lock versions (package-lock.json)
+Run audits:
+npm audit fix
+Avoid deprecated packages
+Minimize dependencies
+
+## Risks Managed
+
+| Risk                 | Mitigation     |
+| -------------------- | -------------- |
+| Vulnerable packages  | Regular audits |
+| Supply chain attacks | Minimal deps   |
+| Version conflicts    | Lockfiles      |
+
+## Vulnerabilities from Improper Validation
+
+1. XSS
+
+`<script>alert(1)</script>`
+
+1. NoSQL Injection
+`{ "email": { "$ne": null } }`
+
+1. DoS
+
+Large payloads overload server
+
+1. Data Integrity Issues
+
+Malformed data breaks logic
+
+1. Mass Assignment
+{ "role": "admin" }
+
+## Mitigation Strategies
+
+Regex validation
+Sanitization
+Payload limits
+Field whitelisting
+
+## Output Encoding (Deep Dive)
+
+Concept
+
+Encoding converts:
+
+< > " '
+
+into safe equivalents
+
+Result
+
+- Scripts are not executed
+- Data is safely displayed
+
+## Encryption Challenges & Solutions
+
+### Choosing Encryption
+
+Solution: AES-256 (Node crypto)
+
+### Cannot Query Encrypted Data
+
+Solution:
+
+- Store encrypted value
+- Store hashed value for lookup
+
+### Re-encryption Issues
+
+Solution:
+
+Only encrypt changed fields
+
+### Key Management
+
+- Store in .env
+- Use strong keys
+- Never hardcode
+
+## Automated Dependency Updates
+
+Workflow Features
+
+- Runs weekly
+- Uses npm audit fix
+- Creates PR: tj → staging → main
+
+Workflow Steps
+
+- Checkout tj branch
+- Install Node.js
+- Install dependencies
+- Run audit fix
+- Create PR
+
+## Audit Strategy
+
+| Scenario           | Action          |
+| ------------------ | --------------- |
+| Low severity       | Monitor         |
+| Safe fix available | Apply           |
+| Breaking change    | Review          |
+| Critical issue     | Fix immediately |
+
+## Automation Risks
+
+- Silent breaking changes
+- Dependency conflicts
+- False sense of security
+
+## Lessons Learned
+
+🔴 Challenge 1: Encrypted Data in UI
+
+Problem:
+Frontend received encrypted data
+
+Solution:
+Decrypt in backend (safeDecrypt)
+
+🔴 Challenge 2: XSS Protection
+
+Problem:
+Multi-layer vulnerability
+
+Solution:
+
+- Frontend validation
+- Backend sanitization
+- React escaping
+
+## Trade-offs
+
+| Challenge            | Insight       |
+| -------------------- | ------------- |
+| Encryption vs search | Use hashing   |
+| Strict validation    | Balance UX    |
+| Data corruption      | Safe fallback |
+
+## Key Takeaways
+
+Input validation prevents injection attacks
+Output encoding prevents execution
+Encryption protects sensitive data
+Defense-in-depth is essential
