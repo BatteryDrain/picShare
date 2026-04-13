@@ -33,7 +33,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const upload = multer({
+export const uploadPhoto = multer({
   storage,
   fileFilter,
   limits: {
