@@ -10,11 +10,15 @@ export const updateProfile = async (req, res) => {
 
     const { username, email, bio } = validateAndSanitize(req.body);
 
-    if (!username && !email && !bio) {
-      return res.status(400).json({ message: "No data provided" });
-    }
-
     const updateData = {};
+    
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = encrypt(email);
+    if (bio !== undefined) updateData.bio = bio;
+    
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "No valid data provided" });
+    }
 
     if (username) updateData.username = username;
     if (email) updateData.email = encrypt(email);
