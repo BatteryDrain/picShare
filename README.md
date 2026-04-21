@@ -316,3 +316,128 @@ Input validation prevents injection attacks
 Output encoding prevents execution
 Encryption protects sensitive data
 Defense-in-depth is essential
+
+## Security Process Documentation
+
+### Security Testing
+
+The application was tested using a combination of manual and automated techniques to identify potential vulnerabilities.
+
+1. Manual Testing
+
+SQL/NoSQL Injection
+
+- Tested login and API endpoints using payloads such as:
+' OR 1=1 --
+- Verified that inputs were properly validated and rejected.
+Cross-Site Scripting (XSS)
+
+Injected payloads such as:
+
+`<script>alert("XSS")</script>`
+
+- Tested across form fields and user-generated content areas.
+
+Authentication Testing
+
+- Attempted to access protected routes without a valid token
+- Tested token manipulation and reuse
+
+File Upload Testing
+
+- Uploaded invalid file types disguised as images
+- Tested file size limits and format validation
+
+1. Automated Testing
+
+Ran:
+
+```bash
+npm audit
+```
+
+Identified vulnerable or outdated dependencies
+
+Performed dynamic scanning using:
+
+- OWASP ZAP
+
+Verified:
+
+- Security headers
+- Input validation issues
+- Common web vulnerabilities
+
+### Vulnerability Fixes
+
+1. Cross-Site Scripting (XSS)
+
+- Sanitized all user inputs before rendering
+- Avoided unsafe rendering methods
+- Validation: Retested payloads → scripts no longer executed
+
+1. Injection Attacks (NoSQL)
+
+- Implemented strict input validation
+- Prevented dynamic query manipulation
+- Validation: Injection attempts rejected successfully
+
+1. Insecure File Upload
+
+- Validated MIME types instead of file extensions
+- Added file size restrictions
+- Stored files securely outside public access
+- Validation: Malicious files rejected
+
+1. Authentication Weaknesses
+
+- Implemented HTTP-only cookies for tokens
+- Added token expiration and validation middleware
+- Validation: Unauthorized access attempts blocked
+
+1. Missing Security Headers
+
+- Added security middleware (e.g., Helmet)
+- Validation: Headers confirmed via security scan
+
+1. Vulnerable Dependencies
+
+- Updated packages using:
+
+npm audit fix
+
+- Validation: Reduced or eliminated known vulnerabilities
+
+### Testing Tools
+
+| Tool                  | Purpose                  | Contribution                                       |
+| --------------------- | ------------------------ | -------------------------------------------------- |
+| OWASP ZAP             | Dynamic security testing | Identified XSS, headers, and misconfigurations     |
+| npm audit             | Dependency scanning      | Detected vulnerable packages                       |
+| Browser DevTools      | Manual testing           | Simulated request tampering and token manipulation |
+| Threat Modeling Tools | System analysis          | Helped identify risks using STRIDE framework       |
+
+### Before vs After Security Improvements
+
+This section highlights the key security gaps identified during testing and the improvements implemented to address them.
+
+| Area                      | Before                                                      | After                                                    | Impact                                            |
+| ------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------- |
+| **Input Validation**      | Minimal validation on client-side                           | Strict validation on both client and server              | Prevents injection attacks and malformed data     |
+| **XSS Protection**        | User input rendered without sanitization                    | Inputs sanitized and safely rendered                     | Eliminates script injection risks                 |
+| **Authentication**        | Tokens loosely handled (e.g., accessible in client storage) | Tokens stored in HTTP-only cookies with validation       | Reduces risk of token theft and session hijacking |
+| **File Uploads**          | Only file extension checked                                 | MIME type validation + file size limits + secure storage | Prevents malicious file uploads                   |
+| **API Security**          | Inconsistent validation across endpoints                    | Centralized validation and middleware enforcement        | Ensures consistent protection across all routes   |
+| **Security Headers**      | Missing or incomplete headers                               | Implemented headers using middleware (e.g., Helmet)      | Protects against common web attacks               |
+| **Dependencies**          | Outdated packages with vulnerabilities                      | Updated using npm audit fix                              | Reduces known security risks                      |
+| **Access Control (RBAC)** | Role checks partially enforced                              | Strict server-side role validation                       | Prevents privilege escalation                     |
+| **Logging & Monitoring**  | Limited or no activity tracking                             | Improved logging for key actions                         | Enhances accountability and auditing              |
+
+### Key Security Lessons Learned
+
+- Security must be integrated early in development, not added after.
+- Manual testing is essential for uncovering real-world attack scenarios that automated tools may miss.
+- Automated tools are valuable for quickly identifying known vulnerabilities and configuration issues.
+- File uploads and authentication systems are high-risk areas that require multiple layers of protection.
+- Balancing security and usability is critical—overly strict validation can negatively impact user experience.
+- Continuous security improvement is necessary, including regular testing, dependency updates, and monitoring
